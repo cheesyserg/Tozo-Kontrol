@@ -6,7 +6,7 @@ A native Linux desktop application for controlling TOZO Bluetooth headphones (AN
 
 ## 1. Prerequisites & Dependencies
 
-Install the build tools, Qt development libraries, BlueZ development headers, and `xxd` (for embedding the application icon)[cite: 2]:
+Install the build tools, Qt development libraries, BlueZ development headers, and `xxd` (for embedding the application icon):
 
 ### Arch Linux / Manjaro
 ```bash
