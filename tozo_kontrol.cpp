@@ -1,3 +1,4 @@
+#include "icon_data.h"
 #include <QApplication>
 #include <QWidget>
 #include <QVBoxLayout>
@@ -363,23 +364,16 @@ private:
     }
 
     void setupAppIcon() {
-        QString appDir = QCoreApplication::applicationDirPath();
-        QStringList candidates = {
-            appDir + "/icon.png", appDir + "/icon.jpg", appDir + "/icon.svg",
-            "icon.png", "icon.jpg", "icon.svg"
-        };
-        QIcon icon;
-        for (const QString &path : candidates) {
-            if (QFile::exists(path)) {
-                icon = QIcon(path);
-                break;
-            }
+        QPixmap pixmap;
+        if (pixmap.loadFromData(icon_jpg, icon_jpg_len)) {
+            QIcon icon(pixmap);
+            setWindowIcon(icon);
+            QApplication::setWindowIcon(icon);
+        } else {
+            QIcon fallback = QIcon::fromTheme("audio-headphones");
+            setWindowIcon(fallback);
+            QApplication::setWindowIcon(fallback);
         }
-        if (icon.isNull()) {
-            icon = QIcon::fromTheme("audio-headphones");
-        }
-        setWindowIcon(icon);
-        QApplication::setWindowIcon(icon);
     }
 
     void setControlsEnabled(bool enabled) {
