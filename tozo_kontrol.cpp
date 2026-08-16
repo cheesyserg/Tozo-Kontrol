@@ -169,6 +169,7 @@ private:
 
     // UI Widgets
     QComboBox *macCombo;
+    QPushButton *btnScan;
     QLabel *batteryLbl;
     QPushButton *connectBtn;
     QGroupBox *modesGroup;
@@ -237,7 +238,7 @@ private:
         macCombo->setMinimumWidth(220);
         connLayout->addWidget(macCombo);
 
-        auto *btnScan = new QPushButton("Scan", this);
+        btnScan = new QPushButton("Scan", this);
         connect(btnScan, &QPushButton::clicked, this, &TozoKdeApp::scanDevices);
         connLayout->addWidget(btnScan);
 
@@ -640,6 +641,7 @@ private slots:
 
         connectBtn->setText("Disconnect");
         macCombo->setEnabled(false);
+        btnScan->setEnabled(false);
         setControlsEnabled(true);
         requestMasterState();
     }
@@ -665,6 +667,7 @@ private slots:
 
         connectBtn->setText("Connect");
         macCombo->setEnabled(true);
+        btnScan->setEnabled(true);
         setControlsEnabled(false);
         batteryLbl->setText("Battery: --%");
         statusLbl->setText("Status: Disconnected.");
