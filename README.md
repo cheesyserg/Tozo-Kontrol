@@ -1,43 +1,43 @@
 # TOZO HT3 Kontrol Panel (Qt / C++ Linux)
 
-A native Linux desktop application for controlling TOZO Bluetooth headphones (ANC modes, low latency, spatial audio, and a 10-band hardware equalizer with custom preset persistence).
+A native Linux desktop application for controlling TOZO Bluetooth headphones (ANC modes, low latency, spatial audio, and a 10-band hardware equalizer with custom preset persistence)[cite: 1, 2].
 
 ---
 
 ## 1. Prerequisites & Dependencies
 
-Install the required build tools, Qt development libraries, and BlueZ development headers for your distribution:
+Install the build tools, Qt development libraries, BlueZ development headers, and `xxd` (for embedding the application icon)[cite: 2]:
 
 ### Arch Linux / Manjaro
 ```bash
-sudo pacman -S base-devel gcc pkgconf qt6-base bluez-libs
+sudo pacman -S base-devel gcc pkgconf qt6-base bluez-libs xxd
 ```
 
 ### Debian / Ubuntu / Linux Mint
 ```bash
 # Qt6 (Recommended)
 sudo apt update
-sudo apt install build-essential g++ pkg-config qt6-base-dev qt6-base-dev-tools libbluetooth-dev
+sudo apt install build-essential g++ pkg-config qt6-base-dev qt6-base-dev-tools libbluetooth-dev xxd
 
 # Qt5 (Alternative)
-sudo apt install build-essential g++ pkg-config qtbase5-dev qtbase5-dev-tools libbluetooth-dev
+sudo apt install build-essential g++ pkg-config qtbase5-dev qtbase5-dev-tools libbluetooth-dev xxd
 ```
 
 ### Fedora
 ```bash
-sudo dnf install gcc-c++ pkgconf-pkg-config qt6-qtbase-devel bluez-libs-devel
+sudo dnf install gcc-c++ pkgconf-pkg-config qt6-qtbase-devel bluez-libs-devel xxd
 ```
 
 ---
 
 ## 2. Directory Structure
 
-Place your source files and application icon in the same directory:
+Place your source files and icon in the same directory:
 
 ```text
 tozo-kontrol/
-├── main.cpp
-├── icon.png        # (or icon.jpg / icon.svg)
+├── tozo_kontrol.cpp
+├── icon.jpg
 └── Makefile        # (optional)
 ```
 
@@ -45,72 +45,81 @@ tozo-kontrol/
 
 ## 3. Building the Application
 
-### Option A: Direct Command Line (Distro-Specific `moc` Paths)
+### Option A: Using the Makefile (Recommended)
 
-#### Arch Linux (Qt6)
-```bash
-/usr/lib/qt6/moc main.cpp -o main.moc && g++ -fPIC main.cpp -o tozo_kontrol $(pkg-config --cflags --libs Qt6Widgets Qt6Gui Qt6Core) -lbluetooth -lpthread
-```
-
-#### Debian / Ubuntu / Linux Mint (Qt6)
-```bash
-/usr/lib/qt6/libexec/moc main.cpp -o main.moc && g++ -fPIC main.cpp -o tozo_kontrol $(pkg-config --cflags --libs Qt6Widgets Qt6Gui Qt6Core) -lbluetooth -lpthread
-```
-
-#### Fedora (Qt6)
-```bash
-/usr/lib64/qt6/bin/moc main.cpp -o main.moc && g++ -fPIC main.cpp -o tozo_kontrol $(pkg-config --cflags --libs Qt6Widgets Qt6Gui Qt6Core) -lbluetooth -lpthread
-```
-
-#### Generic Qt5
-```bash
-moc main.cpp -o main.moc && g++ -fPIC main.cpp -o tozo_kontrol $(pkg-config --cflags --libs Qt5Widgets Qt5Gui Qt5Core) -lbluetooth -lpthread
-```
-
----
-
-### Option B: Using a Makefile (Auto-detects `moc`)
+The Makefile automatically generates the embedded icon header (`icon_data.h`), runs `moc`, and builds a size-optimized, stripped binary.
 
 Save this `Makefile` in the project root:
 
 ```makefile
 CXX = g++
-CXXFLAGS = -fPIC -O2 $(shell pkg-config --cflags Qt6Widgets Qt6Gui Qt6Core)
+CXXFLAGS = -fPIC -Os -s $(shell pkg-config --cflags Qt6Widgets Qt6Gui Qt6Core)
 LIBS = $(shell pkg-config --libs Qt6Widgets Qt6Gui Qt6Core) -lbluetooth -lpthread
 
 # Find distro-specific moc path automatically
 MOC = $(shell which moc 2>/dev/null || which /usr/lib/qt6/moc 2>/dev/null || which /usr/lib/qt6/libexec/moc 2>/dev/null || which /usr/lib64/qt6/bin/moc 2>/dev/null)
 
 TARGET = tozo_kontrol
-SRC = main.cpp
+SRC = tozo_kontrol.cpp
+
+.PHONY: all clean
 
 all: $(TARGET)
+
+icon_data.h: icon.jpg
+	xxd -i $< > $@
 
 main.moc: $(SRC)
 	$(MOC) $< -o $@
 
-$(TARGET): $(SRC) main.moc
+$(TARGET): $(SRC) main.moc icon_data.h
 	$(CXX) $(CXXFLAGS) $(SRC) -o $(TARGET) $(LIBS)
 
 clean:
-	rm -f $(TARGET) main.moc
+	rm -f $(TARGET) main.moc icon_data.h
 ```
 
-Compile with:
+Compile by running:
 ```bash
 make
 ```
 
 ---
 
-## 4. Desktop Launcher & Icon Integration (KDE / GNOME / Wayland)
+### Option B: Direct Command Line
 
-To show the app with its icon in your desktop launcher and taskbar/dock:
+First, generate the embedded icon header:
+```bash
+xxd -i icon.jpg > icon_data.h
+```
 
-1. **Install the Icon:**
+Then compile using your distribution's `moc` path:
+
+#### Arch Linux (Qt6)
+```bash
+/usr/lib/qt6/moc tozo_kontrol.cpp -o main.moc && g++ -fPIC -Os -s tozo_kontrol.cpp -o tozo_kontrol $(pkg-config --cflags --libs Qt6Widgets Qt6Gui Qt6Core) -lbluetooth -lpthread
+```
+
+#### Debian / Ubuntu / Linux Mint (Qt6)
+```bash
+/usr/lib/qt6/libexec/moc tozo_kontrol.cpp -o main.moc && g++ -fPIC -Os -s tozo_kontrol.cpp -o tozo_kontrol $(pkg-config --cflags --libs Qt6Widgets Qt6Gui Qt6Core) -lbluetooth -lpthread
+```
+
+#### Fedora (Qt6)
+```bash
+/usr/lib64/qt6/bin/moc tozo_kontrol.cpp -o main.moc && g++ -fPIC -Os -s tozo_kontrol.cpp -o tozo_kontrol $(pkg-config --cflags --libs Qt6Widgets Qt6Gui Qt6Core) -lbluetooth -lpthread
+```
+
+---
+
+## 4. Desktop Launcher & System Menu Integration
+
+The application embeds its icon directly into the binary at runtime. To also display the icon in your desktop app menu:
+
+1. **Install the Icon Asset:**
    ```bash
    mkdir -p ~/.local/share/icons/hicolor/256x256/apps/
-   cp icon.png ~/.local/share/icons/hicolor/256x256/apps/tozo-kontrol.png
+   cp icon.jpg ~/.local/share/icons/hicolor/256x256/apps/tozo-kontrol.jpg
    ```
 
 2. **Create Desktop Entry:**
@@ -145,4 +154,4 @@ To show the app with its icon in your desktop launcher and taskbar/dock:
 3. Click **Scan** to detect paired devices.
 4. Select your device from the dropdown and click **Connect**.
 
-All presets and configuration states are automatically written to `~/.config/tozo_config.json`.
+Presets and custom configurations are automatically saved to `~/.config/tozo_config.json`.
