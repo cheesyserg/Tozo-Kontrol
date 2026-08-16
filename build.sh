@@ -3,8 +3,8 @@ set -e
 
 # Detect source file
 SRC=""
-for file in "${1}" main.cpp tozo_kontrol.cpp; do
-    if [[ -f "$file" ]]; then
+for file in "${1}" main.cpp tozo_kontrol_w_icon.cpp tozo_kontrol.cpp; do
+    if [[ -n "$file" && -f "$file" ]]; then
         SRC="$file"
         break
     fi
@@ -34,6 +34,6 @@ echo "==> Running MOC..."
 "$MOC_BIN" "$SRC" -o main.moc
 
 echo "==> Compiling $TARGET..."
-g++ -fPIC -O2 "$SRC" -o "$TARGET" $(pkg-config --cflags --libs Qt6Widgets Qt6Gui Qt6Core) -lbluetooth -lpthread
+g++ -fPIC -Os -s "$SRC" -o "$TARGET" $(pkg-config --cflags --libs Qt6Widgets Qt6Gui Qt6Core) -lbluetooth -lpthread
 
-echo "==> Build complete: ./$TARGET"
+echo "==> Build complete: ./$TARGET ($(du -h "$TARGET" | cut -f1))"
