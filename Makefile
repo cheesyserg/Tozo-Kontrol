@@ -21,4 +21,4 @@ $(TARGET): $(SRC) main.moc icon_data.h
 	$(CXX) $(CXXFLAGS) $(SRC) -o $(TARGET) $(LIBS)
 
 clean:
-	rm -f $(TARGET) main.moc icon_data.h
+	rm -f $(TARGET) main.moc icon_data.h qrc_resources.cpp
