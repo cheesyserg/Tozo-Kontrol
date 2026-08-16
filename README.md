@@ -1,6 +1,6 @@
 # TOZO HT3 Kontrol Panel (Qt / C++ Linux)
 
-A native Linux desktop application for controlling TOZO Bluetooth headphones (ANC modes, low latency, spatial audio, and a 10-band hardware equalizer with custom preset persistence)[cite: 1, 2].
+A native Linux desktop application for controlling TOZO Bluetooth headphones (ANC modes, low latency, spatial audio, and a 10-band hardware equalizer with custom preset persistence).
 
 ---
 
