@@ -218,7 +218,7 @@ private:
     }
 
     void initUi() {
-        setWindowTitle("TOZO HT3 Kontrol Panel (Qt/Linux)");
+        setWindowTitle("TOZO HT3 Kontrol Panel");
         setMinimumWidth(680);
 
         setupAppIcon();
@@ -241,7 +241,7 @@ private:
         connLayout->addWidget(btnScan);
 
         batteryLbl = new QLabel("Battery: --%", this);
-        batteryLbl->setStyleSheet("font-weight: bold; color: #2980b9;");
+        batteryLbl->setStyleSheet("font-weight: bold;");
         connLayout->addWidget(batteryLbl);
         connLayout->addStretch(1);
 
